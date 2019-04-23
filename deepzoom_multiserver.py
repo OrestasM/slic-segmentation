@@ -20,6 +20,7 @@
 
 from collections import OrderedDict
 from flask import Flask, abort, make_response, render_template, url_for
+from flask import request
 from io import BytesIO
 import openslide
 from openslide import OpenSlide, OpenSlideError
@@ -39,6 +40,10 @@ from skimage.segmentation import mark_boundaries
 from skimage.util import img_as_float
 from slide import open_slide
 from skimage.io import imread
+import time
+import os
+import shutil
+import sys
 
 SLIDE_DIR = '.'
 SLIDE_CACHE_SIZE = 10
@@ -47,6 +52,9 @@ DEEPZOOM_TILE_SIZE = 254
 DEEPZOOM_OVERLAP = 1
 DEEPZOOM_LIMIT_BOUNDS = True
 DEEPZOOM_TILE_QUALITY = 75
+segments = 512
+sigma = 3
+compactness = 50
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -114,6 +122,8 @@ class _SlideFile(object):
 
 @app.before_first_request
 def _setup():
+    shutil.rmtree('images')
+    os.makedirs("images")
     app.basedir = os.path.abspath(app.config['SLIDE_DIR'])
     config_map = {
         'DEEPZOOM_TILE_SIZE': 'tile_size',
@@ -138,7 +148,7 @@ def _get_slide(path):
     except OpenSlideError:
         abort(404)
 
-
+ 
 @app.route('/')
 def index():
     return render_template('files.html', root_dir=_Directory(app.basedir))
@@ -151,6 +161,25 @@ def slide(path):
     return render_template('slide-fullpage.html', slide_url=slide_url,
             slide_filename=slide.filename, slide_mpp=slide.mpp)
 
+@app.route('/handle_data', methods=['POST'])
+def handle_data():
+    global sigma
+    global compactness
+    global segments
+    sigma = request.values.get("sigma")
+    compactness = request.values.get("compactness")
+    segments = request.values.get("segments")
+    # sigma = request.form['sigma']
+    # print(sigma)
+    # print(data, file=sys.stdout)
+    # return (request.form['sigma'])
+    # return ('', 204)
+    print("Sigma: "+sigma)
+    print("Compactness: "+compactness)
+    print("Segments: "+segments)
+    shutil.rmtree('images')
+    os.makedirs("images")
+    return ('', 204)
 
 @app.route('/<path:path>.dzi')
 def dzi(path):
@@ -176,16 +205,19 @@ def tile(path, level, col, row, format):
     except ValueError:
         # Invalid level or coordinates
         abort(404)
-
-    segments_slic = slic(tile, n_segments=1024, compactness=1, sigma=1)
-
-    # print('SLIC number of segments: {}'.format(len(np.unique(segments_slic))))
-
-    # plt.imsave("test.jpeg", mark_boundaries(img, segments_slic, color=(1, 1, 1)))
-
+        
     buf = BytesIO()
-    converter.segmentation(tile)
-    tile = Image.open("C:/Users/mores/Desktop/Tiff pyramids/tiff/test.jpeg")
+    filename = str(col)+"_"+str(row)+".jpeg"
+    # if os.path.exists(filename):
+        # os.remove("test.jpeg")
+        # time.sleep(2)
+    #     converter.segmentation(tile)
+    #     tile = Image.open("C:/Users/mores/Desktop/Tiff pyramids/tiff/test.jpeg")
+    # else:
+    converter.segmentation(tile, filename, segments, compactness, sigma)
+    tile = Image.open("C:/Users/mores/Desktop/Tiff pyramids/tiff/images/"+filename)
+    
+    
     tile.save(buf, format, quality=app.config['DEEPZOOM_TILE_QUALITY'])
     resp = make_response(buf.getvalue())
     resp.mimetype = 'image/%s' % format

@@ -10,13 +10,15 @@ from skimage.segmentation import mark_boundaries
 from skimage.util import img_as_float
 from slide import open_slide
 from skimage.io import imread
+import time
+import os
 
-def segmentation(img):
+def segmentation(img, filename, segment, compact, sigm):
     # img = imread('C:/Users/mores/AppData/Local/Programs/Python/Python37/Lib/site-packages/skimage/data/test.png')
 
-    segments_slic = slic(img, n_segments=1024, compactness=1, sigma=1)
-
+    segments_slic = slic(img, n_segments=int(segment), compactness=int(compact), sigma=int(sigm))
     # print('SLIC number of segments: {}'.format(len(np.unique(segments_slic))))
+    # print(mark_boundaries(img, segments_slic, color=(1, 1, 1)))
+    plt.imsave("images/"+filename, mark_boundaries(img, segments_slic, color=(1, 1, 1)))
 
-    plt.imsave("test.jpeg", mark_boundaries(img, segments_slic, color=(1, 1, 1)))
 
