@@ -109,8 +109,8 @@ class _SlideFile(object):
 
 @app.before_first_request
 def _setup():
-    shutil.rmtree('images')
-    os.makedirs("images")
+    # shutil.rmtree('images')
+    # os.makedirs("images")
     app.basedir = os.path.abspath(app.config['SLIDE_DIR'])
     config_map = {
         'DEEPZOOM_TILE_SIZE': 'tile_size',
@@ -164,8 +164,8 @@ def handle_data():
     print("Sigma: "+sigma)
     print("Compactness: "+compactness)
     print("Segments: "+segments)
-    shutil.rmtree('images')
-    os.makedirs("images")
+    # shutil.rmtree('images')
+    # os.makedirs("images")
     return ('', 204)
 
 @app.route('/<path:path>.dzi')
