@@ -1,6 +1,4 @@
 *.svs
-__pycache__
 /.vscode
 /data
-/images
 /.idea
