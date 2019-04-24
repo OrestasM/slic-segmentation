@@ -202,7 +202,8 @@ def tile(path, level, col, row, format):
     #     tile = Image.open("C:/Users/mores/Desktop/Tiff pyramids/tiff/test.jpeg")
     # else:
     converter.segmentation(tile, filename, segments, compactness, sigma)
-    tile = Image.open("C:/Users/mores/Desktop/Tiff pyramids/tiff/images/"+filename)
+    dirname = os.path.dirname(__file__)
+    tile = Image.open("./images/"+filename)
     
     
     tile.save(buf, format, quality=app.config['DEEPZOOM_TILE_QUALITY'])
