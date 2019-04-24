@@ -26,11 +26,9 @@ import PIL
 from PIL import Image
 import re
 import sys
-#from deephistopath.wsi import util
-#from deephistopath.wsi.util import Time
 
 BASE_DIR = os.path.join(".", "data")
-# BASE_DIR = os.path.join(os.sep, "Volumes", "BigData", "TUPAC")
+
 TRAIN_PREFIX = "TUPAC-TR-"
 SRC_TRAIN_DIR = os.path.join(BASE_DIR, "training_slides")
 SRC_TRAIN_EXT = "svs"
@@ -77,15 +75,6 @@ STATS_DIR = os.path.join(BASE_DIR, "svs_stats")
 
 
 def open_slide(filename):
-  """
-  Open a whole-slide image (*.svs, etc).
-
-  Args:
-    filename: Name of the slide file.
-
-  Returns:
-    An OpenSlide object representing a whole-slide image.
-  """
   try:
     slide = openslide.open_slide(filename)
   except OpenSlideError:
@@ -96,63 +85,23 @@ def open_slide(filename):
 
 
 def open_image(filename):
-  """
-  Open an image (*.jpg, *.png, etc).
-
-  Args:
-    filename: Name of the image file.
-
-  returns:
-    A PIL.Image.Image object representing an image.
-  """
   image = Image.open(filename)
   return image
 
 
 def open_image_np(filename):
-  """
-  Open an image (*.jpg, *.png, etc) as an RGB NumPy array.
-
-  Args:
-    filename: Name of the image file.
-
-  returns:
-    A NumPy representing an RGB image.
-  """
   pil_img = open_image(filename)
   np_img = util.pil_to_np_rgb(pil_img)
   return np_img
 
 
 def get_training_slide_path(slide_number):
-  """
-  Convert slide number to a path to the corresponding WSI training slide file.
-
-  Example:
-    5 -> ../data/training_slides/TUPAC-TR-005.svs
-
-  Args:
-    slide_number: The slide number.
-
-  Returns:
-    Path to the WSI training slide file.
-  """
   padded_sl_num = str(slide_number).zfill(3)
   slide_filepath = os.path.join(SRC_TRAIN_DIR, TRAIN_PREFIX + padded_sl_num + "." + SRC_TRAIN_EXT)
   return slide_filepath
 
 
 def get_tile_image_path(tile):
-  """
-  Obtain tile image path based on tile information such as row, column, row pixel position, column pixel position,
-  pixel width, and pixel height.
-
-  Args:
-    tile: Tile object.
-
-  Returns:
-    Path to image tile.
-  """
   t = tile
   padded_sl_num = str(t.slide_num).zfill(3)
   tile_path = os.path.join(TILE_DIR, padded_sl_num,
@@ -162,17 +111,6 @@ def get_tile_image_path(tile):
 
 
 def get_tile_image_path_by_slide_row_col(slide_number, row, col):
-  """
-  Obtain tile image path using wildcard lookup with slide number, row, and column.
-
-  Args:
-    slide_number: The slide number.
-    row: The row.
-    col: The column.
-
-  Returns:
-    Path to image tile.
-  """
   padded_sl_num = str(slide_number).zfill(3)
   wilcard_path = os.path.join(TILE_DIR, padded_sl_num,
                               TRAIN_PREFIX + padded_sl_num + "-" + TILE_SUFFIX + "-r%d-c%d-*." % (
@@ -182,23 +120,6 @@ def get_tile_image_path_by_slide_row_col(slide_number, row, col):
 
 
 def get_training_image_path(slide_number, large_w=None, large_h=None, small_w=None, small_h=None):
-  """
-  Convert slide number and optional dimensions to a training image path. If no dimensions are supplied,
-  the corresponding file based on the slide number will be looked up in the file system using a wildcard.
-
-  Example:
-    5 -> ../data/training_png/TUPAC-TR-005-32x-49920x108288-1560x3384.png
-
-  Args:
-    slide_number: The slide number.
-    large_w: Large image width.
-    large_h: Large image height.
-    small_w: Small image width.
-    small_h: Small image height.
-
-  Returns:
-     Path to the image file.
-  """
   padded_sl_num = str(slide_number).zfill(3)
   if large_w is None and large_h is None and small_w is None and small_h is None:
     wildcard_path = os.path.join(DEST_TRAIN_DIR, TRAIN_PREFIX + padded_sl_num + "*." + DEST_TRAIN_EXT)
@@ -211,23 +132,6 @@ def get_training_image_path(slide_number, large_w=None, large_h=None, small_w=No
 
 
 def get_training_thumbnail_path(slide_number, large_w=None, large_h=None, small_w=None, small_h=None):
-  """
-  Convert slide number and optional dimensions to a training thumbnail path. If no dimensions are
-  supplied, the corresponding file based on the slide number will be looked up in the file system using a wildcard.
-
-  Example:
-    5 -> ../data/training_thumbnail_jpg/TUPAC-TR-005-32x-49920x108288-1560x3384.jpg
-
-  Args:
-    slide_number: The slide number.
-    large_w: Large image width.
-    large_h: Large image height.
-    small_w: Small image width.
-    small_h: Small image height.
-
-  Returns:
-     Path to the thumbnail file.
-  """
   padded_sl_num = str(slide_number).zfill(3)
   if large_w is None and large_h is None and small_w is None and small_h is None:
     wilcard_path = os.path.join(DEST_TRAIN_THUMBNAIL_DIR, TRAIN_PREFIX + padded_sl_num + "*." + THUMBNAIL_EXT)
@@ -240,20 +144,6 @@ def get_training_thumbnail_path(slide_number, large_w=None, large_h=None, small_
 
 
 def get_filter_image_path(slide_number, filter_number, filter_name_info):
-  """
-  Convert slide number, filter number, and text to a path to a filter image file.
-
-  Example:
-    5, 1, "rgb" -> ../data/filter_png/TUPAC-TR-005-001-rgb.png
-
-  Args:
-    slide_number: The slide number.
-    filter_number: The filter number.
-    filter_name_info: Descriptive text describing filter.
-
-  Returns:
-    Path to the filter image file.
-  """
   dir = FILTER_DIR
   if not os.path.exists(dir):
     os.makedirs(dir)

@@ -25,25 +25,12 @@ from io import BytesIO
 import openslide
 from openslide import OpenSlide, OpenSlideError
 from openslide.deepzoom import DeepZoomGenerator
-import os
-import base64
 from optparse import OptionParser
 from threading import Lock
 import converter
 from PIL import Image
-import numpy as np
-import matplotlib.pyplot as plt
-from skimage.color import rgb2gray
-from skimage.filters import sobel
-from skimage.segmentation import slic
-from skimage.segmentation import mark_boundaries
-from skimage.util import img_as_float
-from slide import open_slide
-from skimage.io import imread
-import time
 import os
 import shutil
-import sys
 
 SLIDE_DIR = '.'
 SLIDE_CACHE_SIZE = 10
