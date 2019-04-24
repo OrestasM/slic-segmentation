@@ -20,3 +20,4 @@ After cloning Github repo, you need to:\
 
 Now server should be up and running and you should access it by:
 **127.0.0.1:5000**
+Select your settings, press "Set" button and let the segmentation begin!
