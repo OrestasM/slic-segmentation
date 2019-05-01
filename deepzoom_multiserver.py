@@ -1,23 +1,3 @@
-#!/usr/bin/env python
-#
-# deepzoom_multiserver - Example web application for viewing multiple slides
-#
-# Copyright (c) 2010-2015 Carnegie Mellon University
-#
-# This library is free software; you can redistribute it and/or modify it
-# under the terms of version 2.1 of the GNU Lesser General Public License
-# as published by the Free Software Foundation.
-#
-# This library is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-# License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this library; if not, write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-#
-
 from collections import OrderedDict
 from flask import Flask, abort, make_response, render_template, url_for
 from flask import request
@@ -30,7 +10,6 @@ from threading import Lock
 import converter
 from PIL import Image
 import os
-import shutil
 
 SLIDE_DIR = '.'
 SLIDE_CACHE_SIZE = 10
@@ -109,8 +88,6 @@ class _SlideFile(object):
 
 @app.before_first_request
 def _setup():
-    # shutil.rmtree('images')
-    # os.makedirs("images")
     app.basedir = os.path.abspath(app.config['SLIDE_DIR'])
     config_map = {
         'DEEPZOOM_TILE_SIZE': 'tile_size',
@@ -156,16 +133,6 @@ def handle_data():
     sigma = request.values.get("sigma")
     compactness = request.values.get("compactness")
     segments = request.values.get("segments")
-    # sigma = request.form['sigma']
-    # print(sigma)
-    # print(data, file=sys.stdout)
-    # return (request.form['sigma'])
-    # return ('', 204)
-    print("Sigma: "+sigma)
-    print("Compactness: "+compactness)
-    print("Segments: "+segments)
-    # shutil.rmtree('images')
-    # os.makedirs("images")
     return ('', 204)
 
 @app.route('/<path:path>.dzi')

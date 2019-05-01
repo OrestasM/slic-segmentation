@@ -3,3 +3,6 @@
 /data
 /images
 /.idea
+/env
+/backup
+__pycache__/

@@ -1,17 +1,7 @@
-from PIL import Image
-from io import BytesIO
-import base64
-import numpy as np
 import matplotlib.pyplot as plt
-from skimage.color import rgb2gray
-from skimage.filters import sobel
 from skimage.segmentation import slic
 from skimage.segmentation import mark_boundaries
-from skimage.util import img_as_float
-from slide import open_slide
-from skimage.io import imread
-import time
-import os
+
 
 def segmentation(img, filename, segment, compact, sigm):
     # img = imread('C:/Users/mores/AppData/Local/Programs/Python/Python37/Lib/site-packages/skimage/data/test.png')
