@@ -1,3 +1,8 @@
+"""@package docstring
+Documentation for this module.
+More details.
+"""
+
 from collections import OrderedDict
 from flask import Flask, abort, make_response, render_template, url_for
 from flask import request
@@ -10,6 +15,21 @@ from threading import Lock
 import converter
 from PIL import Image
 import os
+
+"""
+Application constants.
+
+Directory of slides (root).
+Size of cache.
+Format of a image in deep zoop canvas.
+The number of extra pixels to add to each interior edge of a tile.
+True to render only the non-empty slide region.
+Render quality.
+Number of segments to slic algorithm.
+Sigma of slic algorithm.
+Compactness of slic algorithm.
+
+"""
 
 SLIDE_DIR = '.'
 SLIDE_CACHE_SIZE = 10
@@ -33,14 +53,25 @@ class PILBytesIO(BytesIO):
         raise AttributeError('Not supported')
 
 
+
+
 class _SlideCache(object):
+    """
+    A class of Slide. Has init and get methods for cache.
+    """
     def __init__(self, cache_size, dz_opts):
+        """
+        Slide initialization method
+        """
         self.cache_size = cache_size
         self.dz_opts = dz_opts
         self._lock = Lock()
         self._cache = OrderedDict()
 
     def get(self, path):
+        """
+        Method for getting slide cache. Has self and path arguments.
+        """
         with self._lock:
             if path in self._cache:
                 # Move to end of LRU
@@ -66,7 +97,13 @@ class _SlideCache(object):
 
 
 class _Directory(object):
+    """
+    A class of Directory
+    """
     def __init__(self, basedir, relpath=''):
+        """
+        Initilization method of directory class. 
+        """
         self.name = os.path.basename(relpath)
         self.children = []
         for name in sorted(os.listdir(os.path.join(basedir, relpath))):
@@ -79,15 +116,23 @@ class _Directory(object):
             elif OpenSlide.detect_format(cur_path):
                 self.children.append(_SlideFile(cur_relpath))
 
-
 class _SlideFile(object):
+    """
+    Class of SlideFile
+    """
     def __init__(self, relpath):
+        """
+        Initialization of SlideFile class.
+        """
         self.name = os.path.basename(relpath)
         self.url_path = relpath
 
 
 @app.before_first_request
 def _setup():
+    """
+    Application setup method. Get called right after application start. Applies config constants. 
+    """
     app.basedir = os.path.abspath(app.config['SLIDE_DIR'])
     config_map = {
         'DEEPZOOM_TILE_SIZE': 'tile_size',
@@ -99,6 +144,9 @@ def _setup():
 
 
 def _get_slide(path):
+    """
+    Method for geeting slide image after path is supplied.
+    """
     path = os.path.abspath(os.path.join(app.basedir, path))
     if not path.startswith(app.basedir + os.path.sep):
         # Directory traversal
@@ -115,11 +163,17 @@ def _get_slide(path):
  
 @app.route('/')
 def index():
+    """
+    Main route, which gets all the available .SVS files in project directory
+    and then renders a template 'files.html', which is a plain HTML.
+    """
     return render_template('files.html', root_dir=_Directory(app.basedir))
-
 
 @app.route('/<path:path>')
 def slide(path):
+    """
+    Route, which gets main working window, where you can view .SVS file breakdown and use deepzoom with segmentation options.
+    """
     slide = _get_slide(path)
     slide_url = url_for('dzi', path=path)
     return render_template('slide-fullpage.html', slide_url=slide_url,
@@ -127,6 +181,10 @@ def slide(path):
 
 @app.route('/handle_data', methods=['POST'])
 def handle_data():
+    """
+    Route, which accepts segmentation options and sets them.
+    It is called when "Set" button in options panel is clicked
+    """
     global sigma
     global compactness
     global segments
@@ -137,15 +195,20 @@ def handle_data():
 
 @app.route('/<path:path>.dzi')
 def dzi(path):
+    """
+    Route, which sends slide to WEB-server
+    """
     slide = _get_slide(path)
     format = app.config['DEEPZOOM_FORMAT']
     resp = make_response(slide.get_dzi(format))
     resp.mimetype = 'application/xml'
     return resp
 
-
 @app.route('/<path:path>_files/<int:level>/<int:col>_<int:row>.<format>')
 def tile(path, level, col, row, format):
+    """
+    Route, which sends tile to WEB-server
+    """
     slide = _get_slide(path)
     format = format.lower()
     if format != 'jpeg' and format != 'png':
@@ -159,27 +222,20 @@ def tile(path, level, col, row, format):
     except ValueError:
         # Invalid level or coordinates
         abort(404)
-        
+
     buf = BytesIO()
     filename = str(col)+"_"+str(row)+".jpeg"
-    # if os.path.exists(filename):
-        # os.remove("test.jpeg")
-        # time.sleep(2)
-    #     converter.segmentation(tile)
-    #     tile = Image.open("C:/Users/mores/Desktop/Tiff pyramids/tiff/test.jpeg")
-    # else:
     converter.segmentation(tile, filename, segments, compactness, sigma)
-    dirname = os.path.dirname(__file__)
     tile = Image.open("./images/"+filename)
-    
-    
+
+
     tile.save(buf, format, quality=app.config['DEEPZOOM_TILE_QUALITY'])
     resp = make_response(buf.getvalue())
     resp.mimetype = 'image/%s' % format
     return resp
 
-
 if __name__ == '__main__':
+    """Defined parser options, which includes deepzoom boundaries limit, config file, host address and port, tile quality and size"""
     parser = OptionParser(usage='Usage: %prog [options] [slide-directory]')
     parser.add_option('-B', '--ignore-bounds', dest='DEEPZOOM_LIMIT_BOUNDS',
                 default=True, action='store_false',
@@ -214,7 +270,7 @@ if __name__ == '__main__':
     # Overwrite only those settings specified on the command line
     for k in dir(opts):
         if not k.startswith('_') and getattr(opts, k) is None:
-            delattr(opts, k)
+           delattr(opts, k)
     app.config.from_object(opts)
     # Set slide directory
     try:

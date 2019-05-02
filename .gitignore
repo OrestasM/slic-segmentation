@@ -6,3 +6,6 @@
 /env
 /backup
 __pycache__/
+/html
+/latex
+slic_config
