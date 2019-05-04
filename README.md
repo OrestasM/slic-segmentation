@@ -14,6 +14,7 @@ After cloning Github repo, you need to:\
     slic-segmentation folder, and after that, you can execute following commands**
 ```
     cd slic-segmentation
+    pip install -r requirements.txt
     mkdir images
     python deepzoom-multiserver.py
 ```
@@ -21,3 +22,5 @@ After cloning Github repo, you need to:\
 Now server should be up and running and you should access it by:
 **127.0.0.1:5000**
 Select your settings, press "Set" button and let the segmentation begin!
+
+If there's a problem with ```pip install``` command, try to activate your virtualenv.
